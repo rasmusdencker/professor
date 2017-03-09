@@ -4,6 +4,7 @@ use Professor\Lexer\FunctionTokenizer;
 use Professor\Lexer\Token;
 use Professor\Lexer\TokenizedExpression;
 use Professor\Lexer\Tokenizer;
+use Professor\Lexer\UnwinderToken;
 use Professor\Utils\StringCoverage;
 
 /**
@@ -80,6 +81,13 @@ class Lexer
 
                     $coverage->markCovered($position, strlen($match));
 
+                    if ($tokenizer->type() === Tokenizer::TYPE_UNWINDER) {
+                        $tokens[$position] = new UnwinderToken(
+                            $this->tokenize($match)
+                        );
+                        continue;
+                    }
+
                     $tokens[$position] = new Token($match, $tokenizer->type());
                 }
             }
@@ -97,12 +105,14 @@ class Lexer
 
     private function addBaseTokenizers()
     {
+        $this->addTokenizer('\[\.{3}(.+?)\]', Tokenizer::TYPE_UNWINDER);
         $this->addTokenizer('-?\d+(?:\.\d+)?', Tokenizer::TYPE_NUMBER);
+        $this->addTokenizer('@([a-zA-Z_]+\.[a-zA-Z_.]*\*(?:$|[a-z_A-Z.*]+))', Tokenizer::TYPE_UNWINDING_VARIABLE);
         $this->addTokenizer('[+\-*\/]', Tokenizer::TYPE_OPERATOR);
         $this->addTokenizer('\(', Tokenizer::TYPE_OPEN_PARENTHESIS);
         $this->addTokenizer('\)', Tokenizer::TYPE_CLOSING_PARENTHESIS);
         $this->addTokenizer(',', Tokenizer::TYPE_ARGUMENT_SEPARATOR);
-        $this->addTokenizer('@([a-zA-Z.]+)', Tokenizer::TYPE_VARIABLE);
+        $this->addTokenizer('@([a-zA-Z_.]+)', Tokenizer::TYPE_VARIABLE);
     }
 
 }

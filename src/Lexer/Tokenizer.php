@@ -9,6 +9,8 @@ class Tokenizer
     const TYPE_FUNCTION = "function";
     const TYPE_ARGUMENT_SEPARATOR = "argument separator";
     const TYPE_VARIABLE = "variable";
+    const TYPE_UNWINDER = "unwinder";
+    const TYPE_UNWINDING_VARIABLE = "unwinding variable";
 
     /**
      * @var string

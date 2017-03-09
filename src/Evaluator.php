@@ -5,6 +5,8 @@ use Professor\Exceptions\EvaluatorException;
 use Professor\Lexer\Token;
 use Professor\Lexer\TokenizedExpression;
 use Professor\Lexer\Tokenizer;
+use Professor\Utils\Arr;
+use Professor\Utils\Variable;
 use Professor\Utils\VariableExtractor;
 
 class Evaluator
@@ -46,14 +48,18 @@ class Evaluator
      *
      * @param array $variables
      *
-     * @return float
+     * @return float|float[]
      * @throws EvaluatorException
      */
-    protected function evaluateToken(Token $token, $result, $iterator) : float
+    protected function evaluateToken(Token $token, $result, $iterator)
     {
         switch ($token->getType()) {
             case Tokenizer::TYPE_NUMBER:
                 return floatval( $token->getValue() );
+                break;
+
+            case Tokenizer::TYPE_UNWINDER:
+                return $this->unwind($token->getSubExpression());
                 break;
 
             case Tokenizer::TYPE_FUNCTION:
@@ -73,18 +79,8 @@ class Evaluator
                 break;
 
             case Tokenizer::TYPE_VARIABLE:
+            case Tokenizer::TYPE_UNWINDING_VARIABLE:
                 return VariableExtractor::extract($token->getValue(), $this->variables);
-                break;
-
-            case Tokenizer::TYPE_CLOSING_PARENTHESIS:
-                $iterator->next(); // Skip the paranthesis
-
-                if(!$iterator->valid())
-                {
-                    return $result;
-                }
-
-                return $this->evaluateToken($iterator->current(), $result, $iterator);
                 break;
 
             case Tokenizer::TYPE_OPERATOR:
@@ -99,32 +95,27 @@ class Evaluator
 
                 switch ($token->getValue()) {
                     case "+":
-                        return $result + $next;
-                        break;
+                        return Variable::add($result, $next);
 
                     case "-":
-                        return $result - $next;
-                        break;
+                        return Variable::subtract($result, $next);
 
                     case "/":
-                        return $result / $next;
-                        break;
+                        return Variable::divide($result, $next);
 
                     case "*":
-                        return $result * $next;
-                        break;
+                        return Variable::multiply($result,$next);
 
                     case "^":
-                        return pow($result, $next);
-                        break;
+                        return Variable::pow($result, $next);
+
+                    default:
+                        return $result;
                 }
-                break;
 
             default:
-                break;
+                return $result;
         }
-
-        return $result;
     }
 
     protected function evaluateUntilMatchingCloseParenthesis($iterator)
@@ -145,25 +136,34 @@ class Evaluator
     {
         $arguments = [];
 
-        $ignore = [
-            Tokenizer::TYPE_ARGUMENT_SEPARATOR,
-            Tokenizer::TYPE_CLOSING_PARENTHESIS
-        ];
-
         while($iterator->valid())
         {
             $token = $iterator->current();
 
-            if(!in_array($token->getType(), $ignore))
-            {
-                $arguments[] = $this->evaluateToken($token, 0, $iterator);
-            }
+            if($token->getType() === Tokenizer::TYPE_CLOSING_PARENTHESIS) break;
 
+            if($token->getType() !== Tokenizer::TYPE_ARGUMENT_SEPARATOR)
+            {
+                $result      = $this->evaluateToken($token, 0, $iterator);
+
+                if( is_array($result) ) {
+                    $arguments += $result;
+                }
+                else {
+                    $arguments[] = $result;
+                }
+
+            }
 
             $iterator->next();
         }
 
         return $arguments;
 
+    }
+
+    private function unwind(TokenizedExpression $rawExpression)
+    {
+        return $this->evaluate($rawExpression, $this->variables);
     }
 }

@@ -1,6 +1,7 @@
 <?php use Professor\Lexer;
 use Professor\Lexer\Token;
 use Professor\Lexer\Tokenizer;
+use Professor\Lexer\UnwinderToken;
 
 class LexerTest extends TestCase
 {
@@ -44,7 +45,7 @@ class LexerTest extends TestCase
     /** @test **/
     function it_doesnt_care_about_whitespace()
     {
-        $tokens = $this->lexer->tokenize(" 1  +    2   ");
+        $tokens = $this->lexer->tokenize(" 1  +       2   ");
 
         $this->assertCount(3, $tokens);
         $this->assertContainsOnlyInstancesOf(Token::class, $tokens);
@@ -193,5 +194,114 @@ class LexerTest extends TestCase
         $this->assertEquals(Tokenizer::TYPE_VARIABLE, $tokens[0]->getType());
         $this->assertEquals(Tokenizer::TYPE_OPERATOR, $tokens[1]->getType());
         $this->assertEquals(Tokenizer::TYPE_VARIABLE, $tokens[0]->getType());
+    }
+
+    /** @test **/
+    function it_tokenizes_unwinders()
+    {
+        // =======================================================
+        // An unwinder is a special token which unpacks/unwinds an
+        // array to separate function arguments.
+        // =======================================================
+        $tokens = $this->lexer->tokenize("[...@foo]");
+
+        $this->assertCount(1, $tokens);
+        $this->assertEquals(Tokenizer::TYPE_UNWINDER, $tokens[0]->getType());
+        $this->assertInstanceOf(UnwinderToken::class, $tokens[0]);
+
+        $subExpression = $tokens[0]->getSubExpression();
+
+        $this->assertCount(1, $subExpression);
+        $this->assertEquals(Tokenizer::TYPE_VARIABLE, $subExpression[0]->getType());
+    }
+
+    /** @test **/
+    function it_tokenizes_unwinders_internal_expressions()
+    {
+        // =======================================================
+        // An unwinder is a special token which unpacks/unwinds an
+        // array to separate function arguments.
+        // =======================================================
+        $tokens = $this->lexer->tokenize("[...@foo + @bar]");
+
+        $this->assertCount(1, $tokens);
+        $this->assertEquals(Tokenizer::TYPE_UNWINDER, $tokens[0]->getType());
+        $this->assertInstanceOf(UnwinderToken::class, $tokens[0]);
+
+        $unwinderTokens = $tokens[0]->getSubExpression();
+        $this->assertCount(3, $unwinderTokens);
+
+        $this->assertEquals("foo", $unwinderTokens[0]->getValue());
+        $this->assertEquals(Tokenizer::TYPE_VARIABLE, $unwinderTokens[0]->getType());
+
+        $this->assertEquals("+", $unwinderTokens[1]->getValue());
+        $this->assertEquals(Tokenizer::TYPE_OPERATOR, $unwinderTokens[1]->getType());
+
+        $this->assertEquals("bar", $unwinderTokens[2]->getValue());
+        $this->assertEquals(Tokenizer::TYPE_VARIABLE, $unwinderTokens[2]->getType());
+
+    }
+
+    /** @test **/
+    function it_tokenizes_unwinding_variables()
+    {
+        //=======================================================
+        //An unwinding variable is an array which is wound up and
+        //inserted into a function as separate arguments.
+        //=======================================================
+
+        $tokens = $this->lexer->tokenize('@foo.*.bar');
+        $this->assertCount(1,$tokens);
+        $this->assertEquals(Tokenizer::TYPE_UNWINDING_VARIABLE, $tokens[0]->getType());
+        $this->assertEquals("foo.*.bar", $tokens[0]->getValue());
+    }
+
+    /** @test **/
+    function it_tokenizes_unwinders_with_unwinding_variables()
+    {
+        $tokens = $this->lexer->tokenize("[...@foo.*.bar + @baz.*]");
+
+        $this->assertCount(1, $tokens);
+        $this->assertInstanceOf(UnwinderToken::class, $tokens[0]);
+
+        $subTokens = $tokens[0]->getSubExpression();
+        $this->assertCount(3, $subTokens);
+
+        $this->assertEquals(Tokenizer::TYPE_UNWINDING_VARIABLE, $subTokens[0]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPERATOR, $subTokens[1]->getType());
+        $this->assertEquals(Tokenizer::TYPE_UNWINDING_VARIABLE, $subTokens[2]->getType());
+    }
+
+    /** @test **/
+    function it_tokenizes_unwinders_in_a_more_complex_expression()
+    {
+        $this->lexer->addFunctionTokenizer('AVERAGE');
+
+        $tokens = $this->lexer->tokenize("AVERAGE( [...@product.sales_histories.*.quantity / @product.sales_histories.*.duration ]) * @supplier.average_lead_time");
+        //AVERAGE
+        //(
+        //[...@product.sales_histories.*.quantity / @product.sales_histories.*.duration ]
+        //)
+        //*
+        //@supplier.average_lead_time
+
+        $this->assertCount(6, $tokens);
+
+        $this->assertEquals(Tokenizer::TYPE_FUNCTION, $tokens[0]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPEN_PARENTHESIS, $tokens[1]->getType());
+        $this->assertEquals(Tokenizer::TYPE_UNWINDER, $tokens[2]->getType());
+        $this->assertEquals(Tokenizer::TYPE_CLOSING_PARENTHESIS, $tokens[3]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPERATOR, $tokens[4]->getType());
+        $this->assertEquals(Tokenizer::TYPE_VARIABLE, $tokens[5]->getType());
+
+        $unwinderTokens = $tokens[2]->getSubExpression();
+
+        $this->assertCount(3, $unwinderTokens);
+
+        $this->assertEquals(Tokenizer::TYPE_UNWINDING_VARIABLE, $unwinderTokens[0]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPERATOR, $unwinderTokens[1]->getType());
+        $this->assertEquals(Tokenizer::TYPE_UNWINDING_VARIABLE, $unwinderTokens[2]->getType());
+
+
     }
 }

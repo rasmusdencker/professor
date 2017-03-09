@@ -2,11 +2,11 @@
 
 class Token
 {
-    private $value;
+    protected $value;
     /**
      * @var string
      */
-    private $type;
+    protected $type;
 
     /**
      * Token constructor.

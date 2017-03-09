@@ -44,7 +44,7 @@ class ProfessorTest extends TestCase
     /** @test **/
     function it_need_a_single_acceptance_test_just_for_prince_Knud()
     {
-        $professor = new Professor(new Lexer, new Evaluator);
+        $professor = $this->newRealProfessor();
 
         $this->assertEquals(
             5,
@@ -83,6 +83,65 @@ class ProfessorTest extends TestCase
             15,
             $professor->calculate("avg(10, 20)")
         );
+    }
 
+    /** @test **/
+    function it_unwinds_arrays_and_puts_them_into_a_function()
+    {
+        $professor = $this->newRealProfessor();
+
+        $professor->addFunction('AVERAGE', function(){
+            return array_sum(func_get_args()) / count(func_get_args());
+        });
+
+        $variables = [
+            "product" => [
+                "name" => "Toothpaste",
+                "sales_histories" => [
+                    ["quantity" => 30, "duration" => 30],
+                    ["quantity" => 90, "duration" => 90],
+                    ["quantity" => 60, "duration" => 60],
+                    ["quantity" => 100, "duration" => 100],
+                ]
+            ]
+        ];
+
+        $result = $professor->calculate(
+            "AVERAGE( [...@product.sales_histories.*.quantity / @product.sales_histories.*.duration ])",
+            $variables
+        );
+
+        $this->assertEquals(1, $result);
+
+        $variables = [
+            "product" => [
+                "name" => "Toothpaste",
+                "sales_histories" => [
+                    ["quantity" => 30, "duration" => 30], // 30 sold last 45 days
+                    ["quantity" => 45, "duration" => 90], // 45 sold the last 90 days
+                    ["quantity" => 90, "duration" => 120, "offset" => 245] // 90 sold the next 120 days (last year)
+                ]
+            ],
+            "supplier" => [
+                "average_lead_time" => 3 // Average days from order placement to first reception
+            ]
+        ];
+
+
+
+        $result = $professor->calculate(
+            "AVERAGE( [...@product.sales_histories.*.quantity / @product.sales_histories.*.duration ]) * (30 + @supplier.average_lead_time)",
+            $variables
+        );
+
+        $this->assertEquals(24.75, $result);
+    }
+
+    /**
+     * @return Professor
+     */
+    protected function newRealProfessor(): Professor
+    {
+        return new Professor(new Lexer, new Evaluator);
     }
 }

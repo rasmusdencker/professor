@@ -1,0 +1,27 @@
+{
+  "name": "professor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "tdd": "gulp tdd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rasmusdencker/professor.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rasmusdencker/professor/issues"
+  },
+  "homepage": "https://github.com/rasmusdencker/professor#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-watch": "^4.3.11",
+    "yargs": "^7.0.1"
+  }
+}
