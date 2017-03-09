@@ -1,11 +1,11 @@
-<?php namespace Professor;
+<?php namespace Selveo\Professor;
 
-use Professor\Lexer\FunctionTokenizer;
-use Professor\Lexer\Token;
-use Professor\Lexer\TokenizedExpression;
-use Professor\Lexer\Tokenizer;
-use Professor\Lexer\UnwinderToken;
-use Professor\Utils\StringCoverage;
+use Selveo\Professor\Lexer\FunctionTokenizer;
+use Selveo\Professor\Lexer\Token;
+use Selveo\Professor\Lexer\TokenizedExpression;
+use Selveo\Professor\Lexer\Tokenizer;
+use Selveo\Professor\Lexer\UnwinderToken;
+use Selveo\Professor\Utils\StringCoverage;
 
 /**
  * Class Lexer

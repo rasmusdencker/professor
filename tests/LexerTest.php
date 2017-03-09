@@ -1,7 +1,7 @@
-<?php use Professor\Lexer;
-use Professor\Lexer\Token;
-use Professor\Lexer\Tokenizer;
-use Professor\Lexer\UnwinderToken;
+<?php use Selveo\Professor\Lexer;
+use Selveo\Professor\Lexer\Token;
+use Selveo\Professor\Lexer\Tokenizer;
+use Selveo\Professor\Lexer\UnwinderToken;
 
 class LexerTest extends TestCase
 {

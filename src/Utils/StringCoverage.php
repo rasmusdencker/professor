@@ -1,4 +1,4 @@
-<?php namespace Professor\Utils;
+<?php namespace Selveo\Professor\Utils;
 
 class StringCoverage extends RangeCoverage
 {

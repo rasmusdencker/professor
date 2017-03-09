@@ -1,9 +1,9 @@
 <?php
 
-use Professor\Lexer\Token;
-use Professor\Lexer\TokenizedExpression;
-use Professor\Lexer\Tokenizer;
-use Professor\Lexer\UnwinderToken;
+use Selveo\Professor\Lexer\Token;
+use Selveo\Professor\Lexer\TokenizedExpression;
+use Selveo\Professor\Lexer\Tokenizer;
+use Selveo\Professor\Lexer\UnwinderToken;
 
 
 class EvaluatorUnwinderTest extends EvaluatorTestCase

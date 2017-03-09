@@ -1,10 +1,9 @@
 <?php
 
-use Professor\Evaluator;
-use Professor\Exceptions\EvaluatorException;
-use Professor\Lexer\Token;
-use Professor\Lexer\TokenizedExpression;
-use Professor\Lexer\Tokenizer;
+use Selveo\Professor\Exceptions\EvaluatorException;
+use Selveo\Professor\Lexer\Token;
+use Selveo\Professor\Lexer\TokenizedExpression;
+use Selveo\Professor\Lexer\Tokenizer;
 
 class EvaluatorTest extends EvaluatorTestCase
 {

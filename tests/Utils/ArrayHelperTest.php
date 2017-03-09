@@ -1,6 +1,6 @@
 <?php
 
-use Professor\Utils\Arr;
+use Selveo\Professor\Utils\Arr;
 
 class ArrayHelperTest extends TestCase
 {

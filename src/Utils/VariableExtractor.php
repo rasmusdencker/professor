@@ -1,6 +1,6 @@
-<?php namespace Professor\Utils;
+<?php namespace Selveo\Professor\Utils;
 
-use Professor\Exceptions\UndefinedVariableException;
+use Selveo\Professor\Exceptions\UndefinedVariableException;
 
 class VariableExtractor
 {

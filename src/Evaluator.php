@@ -1,13 +1,13 @@
-<?php namespace Professor;
+<?php namespace Selveo\Professor;
 
-use Professor\Evaluator\EvaluatorFunction;
-use Professor\Exceptions\EvaluatorException;
-use Professor\Lexer\Token;
-use Professor\Lexer\TokenizedExpression;
-use Professor\Lexer\Tokenizer;
-use Professor\Utils\Arr;
-use Professor\Utils\Variable;
-use Professor\Utils\VariableExtractor;
+use Selveo\Professor\Evaluator\EvaluatorFunction;
+use Selveo\Professor\Exceptions\EvaluatorException;
+use Selveo\Professor\Lexer\Token;
+use Selveo\Professor\Lexer\TokenizedExpression;
+use Selveo\Professor\Lexer\Tokenizer;
+use Selveo\Professor\Utils\Arr;
+use Selveo\Professor\Utils\Variable;
+use Selveo\Professor\Utils\VariableExtractor;
 
 class Evaluator
 {

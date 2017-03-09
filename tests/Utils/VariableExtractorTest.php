@@ -1,6 +1,6 @@
 <?php
 
-use Professor\Utils\VariableExtractor as E;
+use Selveo\Professor\Utils\VariableExtractor as E;
 
 class VariableExtractorTest extends TestCase
 {
@@ -29,7 +29,7 @@ class VariableExtractorTest extends TestCase
     /** @test **/
     function it_throws_if_a_variable_is_not_found()
     {
-        $this->expectException(\Professor\Exceptions\UndefinedVariableException::class);
+        $this->expectException(\Selveo\Professor\Exceptions\UndefinedVariableException::class);
         E::extract("foo", []);
     }
 

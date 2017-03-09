@@ -1,4 +1,4 @@
-<?php namespace Professor\Lexer;
+<?php namespace Selveo\Professor\Lexer;
 
 class TokenizedExpression implements \Countable, \IteratorAggregate, \ArrayAccess
 {

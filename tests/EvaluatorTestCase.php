@@ -1,5 +1,5 @@
 <?php
-use Professor\Evaluator;
+use Selveo\Professor\Evaluator;
 
 class CallableMock{
     public function call()

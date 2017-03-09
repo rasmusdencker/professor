@@ -1,4 +1,4 @@
-<?php namespace Professor\Exceptions;
+<?php namespace Selveo\Professor\Exceptions;
 
 class EvaluatorException extends \Exception
 {

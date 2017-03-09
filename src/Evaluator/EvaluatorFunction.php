@@ -1,4 +1,4 @@
-<?php namespace Professor\Evaluator;
+<?php namespace Selveo\Professor\Evaluator;
 
 class EvaluatorFunction
 {

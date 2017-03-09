@@ -1,6 +1,6 @@
 <?php
 
-use Professor\Utils\Variable as VariableHelper;
+use Selveo\Professor\Utils\Variable as VariableHelper;
 
 class VariableHelperTest extends TestCase
 {

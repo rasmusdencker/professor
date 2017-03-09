@@ -1,4 +1,4 @@
-<?php namespace Professor;
+<?php namespace Selveo\Professor;
 
 class Professor
 {

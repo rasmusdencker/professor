@@ -1,8 +1,8 @@
 <?php
 
-use Professor\Evaluator;
-use Professor\Lexer;
-use Professor\Professor;
+use Selveo\Professor\Evaluator;
+use Selveo\Professor\Lexer;
+use Selveo\Professor\Professor;
 
 class ProfessorTest extends TestCase
 {
