@@ -25,9 +25,7 @@ class Evaluator
         {
             /** @var Token $token */
             $token = $iterator->current();
-
             $result = $this->evaluateToken($token, $result, $iterator);
-
             $iterator->next();
         }
 
@@ -46,8 +44,6 @@ class Evaluator
      * @param       $result
      * @param       $iterator
      *
-     * @param array $variables
-     *
      * @return float|float[]
      * @throws EvaluatorException
      */
@@ -65,9 +61,10 @@ class Evaluator
             case Tokenizer::TYPE_FUNCTION:
                 $functionName = strtolower($token->getValue());
 
-                if(!isset($this->functions[$functionName])) throw new EvaluatorException("Unknown function '{$token->getValue()}'.");
+                if(!isset($this->functions[$functionName])) {
+                    throw new EvaluatorException("Unknown function '{$token->getValue()}'.");
+                }
 
-                $iterator->next();
                 $iterator->next();
 
                 return $this->functions[$functionName]->evaluate(
@@ -76,7 +73,6 @@ class Evaluator
 
             case Tokenizer::TYPE_OPEN_PARENTHESIS:
                 return $this->evaluateUntilMatchingCloseParenthesis($iterator);
-                break;
 
             case Tokenizer::TYPE_VARIABLE:
             case Tokenizer::TYPE_UNWINDING_VARIABLE:
@@ -120,11 +116,24 @@ class Evaluator
 
     protected function evaluateUntilMatchingCloseParenthesis($iterator)
     {
-        $iterator->next();
         $result = 0;
+        $opens = 0;
 
-        while($iterator->valid() && ($token = $iterator->current())->getType() !== Tokenizer::TYPE_CLOSING_PARENTHESIS)
+        while($iterator->valid())
         {
+            $token = $iterator->current();
+
+            if($token->getType() === Tokenizer::TYPE_CLOSING_PARENTHESIS){
+                $opens--;
+                if($opens <= 0) break;
+            }
+
+            if($token->getType() === Tokenizer::TYPE_OPEN_PARENTHESIS){
+                $opens++;
+                $iterator->next();
+                continue;
+            }
+
             $result = $this->evaluateToken($token, $result, $iterator);
             $iterator->next();
         }
@@ -132,30 +141,74 @@ class Evaluator
         return $result;
     }
 
+    /**
+     * @param $result
+     * @param $iterator
+     *
+     * @return float|\float[]
+     */
+    protected function next($result, $iterator)
+    {
+        $iterator->next();
+
+        if (!$iterator->valid()) {
+            return $result;
+        }
+
+        return $this->evaluateToken($iterator->current(), $result, $iterator);
+    }
+
     private function collectFunctionArguments($iterator)
     {
         $arguments = [];
+
+        $opens = 0;
+        $result = 0;
 
         while($iterator->valid())
         {
             $token = $iterator->current();
 
-            if($token->getType() === Tokenizer::TYPE_CLOSING_PARENTHESIS) break;
+            if($token->getType() === Tokenizer::TYPE_CLOSING_PARENTHESIS){
+                $opens--;
+                if($opens <= 0) break;
+            }
 
-            if($token->getType() !== Tokenizer::TYPE_ARGUMENT_SEPARATOR)
+            if($token->getType() === Tokenizer::TYPE_OPEN_PARENTHESIS){
+                $opens++;
+                $iterator->next();
+                continue;
+            }
+
+            // =========================================================
+            // Every time we meet an argument separator, append the last
+            // result to the argument array and go to the next token.
+            // =========================================================
+            if($token->getType() === Tokenizer::TYPE_ARGUMENT_SEPARATOR)
             {
-                $result      = $this->evaluateToken($token, 0, $iterator);
-
                 if( is_array($result) ) {
                     $arguments += $result;
                 }
                 else {
                     $arguments[] = $result;
                 }
-
+                $result = 0;
+                $iterator->next();
+                continue;
             }
 
+            $result      = $this->evaluateToken($token, $result, $iterator);
             $iterator->next();
+        }
+
+        // =========================================
+        // Add the last result to the argument array
+        // =========================================
+        if( is_array($result) ) {
+            $arguments += $result;
+        }
+        else {
+            $arguments[] = $result;
         }
 
         return $arguments;

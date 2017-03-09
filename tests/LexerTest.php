@@ -304,4 +304,25 @@ class LexerTest extends TestCase
 
 
     }
+
+    /** @test **/
+    function it_tokenizes_nested_functions()
+    {
+        $this->lexer->addFunctionTokenizer('AVERAGE');
+        $this->lexer->addFunctionTokenizer('ROUND');
+
+        $tokens = $this->lexer->tokenize("ROUND(AVERAGE( 10, 13 ))");
+
+        $this->assertCount(9, $tokens);
+
+        $this->assertEquals(Tokenizer::TYPE_FUNCTION, $tokens[0]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPEN_PARENTHESIS, $tokens[1]->getType());
+        $this->assertEquals(Tokenizer::TYPE_FUNCTION, $tokens[2]->getType());
+        $this->assertEquals(Tokenizer::TYPE_OPEN_PARENTHESIS, $tokens[3]->getType());
+        $this->assertEquals(Tokenizer::TYPE_NUMBER, $tokens[4]->getType());
+        $this->assertEquals(Tokenizer::TYPE_ARGUMENT_SEPARATOR, $tokens[5]->getType());
+        $this->assertEquals(Tokenizer::TYPE_NUMBER, $tokens[6]->getType());
+        $this->assertEquals(Tokenizer::TYPE_CLOSING_PARENTHESIS, $tokens[7]->getType());
+        $this->assertEquals(Tokenizer::TYPE_CLOSING_PARENTHESIS, $tokens[8]->getType());
+    }
 }

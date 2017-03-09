@@ -273,5 +273,77 @@ class EvaluatorTest extends EvaluatorTestCase
     }
 
 
+    /** @test **/
+    function it_evaluates_nested_functions()
+    {
+        $this->mockEvaluatorFunction('AVERAGE')
+            ->expects($this->once())
+            ->method(self::CALLABLE_METHOD_NAME)
+            ->with(10,15,18)
+            ->willReturn(14.3);
 
+        $this->mockEvaluatorFunction('ROUND')
+                ->expects($this->once())
+                ->method(self::CALLABLE_METHOD_NAME)
+                ->with(14.3)
+                ->willReturn(14);
+
+        $tokens = new TokenizedExpression([
+            new Token('ROUND', Tokenizer::TYPE_FUNCTION),
+            new Token('(', Tokenizer::TYPE_OPEN_PARENTHESIS),
+            new Token('AVERAGE', Tokenizer::TYPE_FUNCTION),
+            new Token('(', Tokenizer::TYPE_OPEN_PARENTHESIS),
+            new Token('10', Tokenizer::TYPE_NUMBER),
+            new Token(',', Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+            new Token('15', Tokenizer::TYPE_NUMBER),
+            new Token(',', Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+            new Token('18', Tokenizer::TYPE_NUMBER),
+            new Token(')', Tokenizer::TYPE_CLOSING_PARENTHESIS),
+            new Token(')', Tokenizer::TYPE_CLOSING_PARENTHESIS),
+        ]);
+
+        $this->assertEquals(
+            14,
+            $this->evaluator->evaluate($tokens)
+        );
+    }
+
+
+    /** @test **/
+    function it_evaluates_nested_functions_and_arithmetic_operations_mixed()
+    {
+        $this->mockEvaluatorFunction('AVERAGE')
+            ->expects($this->once())
+            ->method(self::CALLABLE_METHOD_NAME)
+            ->with(10,15,18)
+            ->willReturn(14.3);
+
+        $this->mockEvaluatorFunction('ROUND')
+                ->expects($this->once())
+                ->method(self::CALLABLE_METHOD_NAME)
+                ->with(28.6)
+                ->willReturn(29);
+
+        // ROUND( AVERAGE( 10, 15, 18 ) * 2 )
+        $tokens = new TokenizedExpression([
+            new Token('ROUND', Tokenizer::TYPE_FUNCTION),
+            new Token('(', Tokenizer::TYPE_OPEN_PARENTHESIS),
+            new Token('AVERAGE', Tokenizer::TYPE_FUNCTION),
+            new Token('(', Tokenizer::TYPE_OPEN_PARENTHESIS),
+            new Token('10', Tokenizer::TYPE_NUMBER),
+            new Token(',', Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+            new Token('15', Tokenizer::TYPE_NUMBER),
+            new Token(',', Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+            new Token('18', Tokenizer::TYPE_NUMBER),
+            new Token(')', Tokenizer::TYPE_CLOSING_PARENTHESIS),
+            new Token('*', Tokenizer::TYPE_OPERATOR),
+            new Token('2', Tokenizer::TYPE_NUMBER),
+            new Token(')', Tokenizer::TYPE_CLOSING_PARENTHESIS),
+        ]);
+
+        $this->assertEquals(
+            29,
+            $this->evaluator->evaluate($tokens)
+        );
+    }
 }
