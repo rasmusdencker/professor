@@ -346,4 +346,71 @@ class EvaluatorTest extends EvaluatorTestCase
             $this->evaluator->evaluate($tokens)
         );
     }
+
+
+    /** @test **/
+    function it_performs_arithmetic_operations_on_function_output()
+    {
+        $sumMock = $this->mockEvaluatorFunction('SUM');
+
+        $sumMock->expects($this->at(0))
+                ->method(self::CALLABLE_METHOD_NAME)
+                ->with(1, 2)
+                ->willReturn(3);
+
+        $sumMock->expects($this->at(1))
+                ->method(self::CALLABLE_METHOD_NAME)
+                ->with(3, 4)
+                ->willReturn(7);
+
+        // SUM(1,2) + SUM(3,4)
+        $expression = new TokenizedExpression([
+           new Token("SUM", Tokenizer::TYPE_FUNCTION),
+           new Token("(", Tokenizer::TYPE_OPEN_PARENTHESIS),
+           new Token("1", Tokenizer::TYPE_NUMBER),
+           new Token(",", Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+           new Token("2", Tokenizer::TYPE_NUMBER),
+           new Token(")", Tokenizer::TYPE_CLOSING_PARENTHESIS),
+           new Token("+", Tokenizer::TYPE_OPERATOR),
+           new Token("SUM", Tokenizer::TYPE_FUNCTION),
+           new Token("(", Tokenizer::TYPE_OPEN_PARENTHESIS),
+           new Token("3", Tokenizer::TYPE_NUMBER),
+           new Token(",", Tokenizer::TYPE_ARGUMENT_SEPARATOR),
+           new Token("4", Tokenizer::TYPE_NUMBER),
+           new Token(")", Tokenizer::TYPE_CLOSING_PARENTHESIS),
+        ]);
+
+        $this->assertEquals(
+            10,
+            $this->evaluator->evaluate($expression)
+        );
+    }
+
+    /** @test **/
+    function it_passes_array_values_into_a_function_regardless_of_its_internal_type()
+    {
+        $variables = [
+            "group" => [
+                "user_ids" =>[ 1,2,3,4,5 ]
+            ]
+        ];
+
+        $this->mockEvaluatorFunction('COUNT')
+            ->expects($this->once())
+            ->method(self::CALLABLE_METHOD_NAME)
+            ->with([1,2,3,4,5])
+            ->willReturn(5);
+
+        $expression = new TokenizedExpression([
+           new Token("COUNT", Tokenizer::TYPE_FUNCTION),
+           new Token("(", Tokenizer::TYPE_OPEN_PARENTHESIS),
+           new Token("group.user_ids.*", Tokenizer::TYPE_UNWINDING_VARIABLE),
+           new Token(")", Tokenizer::TYPE_CLOSING_PARENTHESIS)
+        ]);
+
+        $this->assertEquals(
+            5,
+            $this->evaluator->evaluate($expression, $variables)
+        );
+    }
 }

@@ -5,7 +5,6 @@ use Selveo\Professor\Exceptions\EvaluatorException;
 use Selveo\Professor\Lexer\Token;
 use Selveo\Professor\Lexer\TokenizedExpression;
 use Selveo\Professor\Lexer\Tokenizer;
-use Selveo\Professor\Utils\Arr;
 use Selveo\Professor\Utils\Variable;
 use Selveo\Professor\Utils\VariableExtractor;
 
@@ -164,6 +163,7 @@ class Evaluator
 
         $opens = 0;
         $result = 0;
+        $merge = false;
 
         while($iterator->valid())
         {
@@ -186,7 +186,7 @@ class Evaluator
             // =========================================================
             if($token->getType() === Tokenizer::TYPE_ARGUMENT_SEPARATOR)
             {
-                if( is_array($result) ) {
+                if( $merge ) {
                     $arguments += $result;
                 }
                 else {
@@ -197,14 +197,15 @@ class Evaluator
                 continue;
             }
 
-            $result      = $this->evaluateToken($token, $result, $iterator);
+            $result = $this->evaluateToken($token, $result, $iterator);
+            $merge  = $token->getType() === Tokenizer::TYPE_UNWINDER;
             $iterator->next();
         }
 
         // =========================================
         // Add the last result to the argument array
         // =========================================
-        if( is_array($result) ) {
+        if( $merge ) {
             $arguments += $result;
         }
         else {
