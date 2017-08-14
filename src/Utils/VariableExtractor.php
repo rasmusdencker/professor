@@ -22,7 +22,7 @@ class VariableExtractor
             return static::diveAll($path, $variables);
         }
 
-        if(!isset($variables[$current]))
+        if(!array_key_exists($current, $variables))
         {
             throw new UndefinedVariableException($current);
         }

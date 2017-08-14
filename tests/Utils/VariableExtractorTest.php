@@ -84,4 +84,20 @@ class VariableExtractorTest extends TestCase
 
         $this->assertEquals([23,10], $result);
     }
+
+    /** @test **/
+    function it_wont_throw_exceptions_when_a_value_is_falsy()
+    {
+        $data = [
+            'foo' => [
+                'bar' => null,
+                'baz' => false
+            ]
+        ];
+
+        $this->assertEquals(null, E::extract('foo.bar', $data));
+        $this->assertEquals(false, E::extract('foo.baz', $data));
+
+
+    }
 }
