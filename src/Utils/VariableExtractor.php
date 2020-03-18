@@ -6,11 +6,27 @@ class VariableExtractor
 {
     const VARIABLE_WILDCARD = "*";
 
+    protected static $undefinedVariablesReturn;
+    protected static $undefinedVariablesThrows = true;
+
+
     public static function extract(string $variable, array $variables)
     {
         $path = explode(".", $variable);
 
         return static::dive($path, $variables);
+    }
+
+    public static function undefinedVariablesReturn($val)
+    {
+        static::$undefinedVariablesThrows = false;
+        static::$undefinedVariablesReturn = $val;
+    }
+
+    public static function undefinedVariablesThrows()
+    {
+        static::$undefinedVariablesThrows = true;
+        static::$undefinedVariablesReturn = null;
     }
 
     private static function dive(array $path, array $variables)
@@ -24,7 +40,11 @@ class VariableExtractor
 
         if(!array_key_exists($current, $variables))
         {
-            throw new UndefinedVariableException($current);
+            if(static::$undefinedVariablesThrows){
+                throw new UndefinedVariableException($current);
+            }
+
+            return static::$undefinedVariablesReturn;
         }
 
         $value = $variables[$current];

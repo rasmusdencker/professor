@@ -1,5 +1,6 @@
 <?php
 
+use Selveo\Professor\Exceptions\UndefinedVariableException;
 use Selveo\Professor\Utils\VariableExtractor as E;
 
 class VariableExtractorTest extends TestCase
@@ -99,5 +100,18 @@ class VariableExtractorTest extends TestCase
         $this->assertEquals(false, E::extract('foo.baz', $data));
 
 
+    }
+
+    /** @test */
+    public function it_is_possible_to_fail_gracefully_when_extracting_variables(){
+        E::undefinedVariablesReturn(null);
+        $this->assertNull(E::extract('foo', []));
+
+        E::undefinedVariablesReturn(1);
+        $this->assertEquals(1, E::extract('foo', []));
+
+        E::undefinedVariablesThrows();
+        $this->expectException(UndefinedVariableException::class);
+        E::extract('foo', []);
     }
 }
