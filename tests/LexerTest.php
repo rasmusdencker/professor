@@ -8,7 +8,7 @@ class LexerTest extends TestCase
     /** @var Lexer */
     protected $lexer;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->lexer = new Lexer;

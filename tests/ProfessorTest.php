@@ -15,7 +15,7 @@ class ProfessorTest extends TestCase
     /** @var  Professor */
     protected $professor;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->lexer = $this->createMock(Lexer::class);

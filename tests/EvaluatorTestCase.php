@@ -15,7 +15,7 @@ class EvaluatorTestCase extends TestCase
     /** @var  Evaluator */
     protected $evaluator;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->evaluator = new Evaluator;
@@ -26,7 +26,7 @@ class EvaluatorTestCase extends TestCase
      *
      * @return PHPUnit_Framework_MockObject_MockObject
      */
-    protected function mockEvaluatorFunction($functionName = "assert"): PHPUnit_Framework_MockObject_MockObject
+    protected function mockEvaluatorFunction($functionName = "assert"): CallableMock
     {
         $mock = $this->createMock(CallableMock::class);
 
